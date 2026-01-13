@@ -1,192 +1,166 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>Easy English Adventure</title>
+
 <style>
 body{
 margin:0;
 font-family:'Comic Sans MS',cursive;
-background:linear-gradient(#74ebd5,#9face6);
-text-align:center;
+background:linear-gradient(#6dd5fa,#2980b9);
 overflow:hidden;
+text-align:center;
 }
+
+.cloud{
+position:absolute;
+background:white;
+border-radius:50px;
+opacity:0.6;
+animation:moveCloud 40s linear infinite;
+}
+
+@keyframes moveCloud{
+0%{left:-200px;}
+100%{left:100%;}
+}
+
 .screen{
 display:none;
 padding:20px;
 }
 .active{display:block;}
 
-h1{color:#fff;text-shadow:3px 3px #333;font-size:40px;}
+h1{
+color:white;
+font-size:42px;
+text-shadow:4px 4px #000;
+animation:bounce 2s infinite;
+}
+
+@keyframes bounce{
+0%,100%{transform:translateY(0);}
+50%{transform:translateY(-10px);}
+}
+
 button{
 padding:15px 30px;
-font-size:20px;
 border:none;
 border-radius:20px;
-margin:10px;
+font-size:18px;
+background:#ffdd00;
+box-shadow:4px 4px #333;
 cursor:pointer;
-background:#ffcc00;
-box-shadow:3px 3px #333;
-transition:.3s;
+margin:10px;
 }
+
 button:hover{transform:scale(1.1);}
 
-.menu{
-margin-top:80px;
-}
-
-.card{
-background:white;
-border-radius:20px;
-padding:20px;
-margin:20px auto;
-width:300px;
-box-shadow:5px 5px #333;
-}
-
 .option{
-display:block;
-background:#74ebd5;
-margin:10px;
+background:#7efaff;
 padding:15px;
+margin:10px auto;
+width:250px;
 border-radius:15px;
 cursor:pointer;
 font-size:18px;
+box-shadow:3px 3px #333;
 }
 
-#timer{
-font-size:30px;
-color:red;
+#timer{font-size:30px;color:red;}
+
+.progress{
+width:80%;
+height:20px;
+background:#fff;
+margin:auto;
+border-radius:10px;
+overflow:hidden;
 }
 
-img{
-width:200px;
-height:200px;
-border-radius:20px;
+.progress div{
+height:100%;
+background:#00ff00;
+width:0%;
 }
 
-.fade{
-animation:fade .5s;
-}
-@keyframes fade{
-from{opacity:0;}
-to{opacity:1;}
-}
 </style>
 </head>
 
 <body>
 
-<!-- HOME -->
-<div id="home" class="screen active fade">
+<div class="cloud" style="top:50px;width:200px;height:60px;animation-duration:60s"></div>
+<div class="cloud" style="top:150px;width:300px;height:80px;animation-duration:80s"></div>
+
+<audio id="bgm" loop src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_0d82b1f3f3.mp3"></audio>
+<audio id="correct" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_6b9a2e0c3a.mp3"></audio>
+<audio id="wrong" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_76b81b0b20.mp3"></audio>
+
+<div id="home" class="screen active">
 <h1>Easy English Adventure</h1>
-<div class="menu">
 <button onclick="openWorld()">Start Adventure</button>
 <button onclick="openWorld()">Choose World</button>
 <button onclick="openGallery()">Learning Gallery</button>
 <br><br>
-<button onclick="toggleAudio()">🔊 Audio ON/OFF</button>
-</div>
+<button onclick="toggleMusic()">🎵 Music ON/OFF</button>
 </div>
 
-<!-- WORLD -->
-<div id="world" class="screen fade">
-<h1>Choose Topic</h1>
-<div class="card">
+<div id="world" class="screen">
+<h1>Select World</h1>
 <button onclick="startGame('animals')">Animals</button>
 <button onclick="startGame('food')">Food</button>
 <button onclick="startGame('numbers')">Numbers</button>
 <button onclick="startGame('colors')">Colors</button>
+<button onclick="startGame('letters')">Letters</button>
+<button onclick="startGame('home')">Home</button>
+<button onclick="startGame('body')">Body</button>
+<button onclick="startGame('hospital')">Hospital</button>
+<button onclick="startGame('computer')">Computer</button>
 <button onclick="startGame('transport')">Transport</button>
 <button onclick="goHome()">Back</button>
 </div>
-</div>
 
-<!-- GAME -->
-<div id="game" class="screen fade">
-<h1 id="questionTitle"></h1>
+<div id="game" class="screen">
+<h1 id="question"></h1>
 <div id="timer">5</div>
+<div class="progress"><div id="bar"></div></div>
 <div id="options"></div>
 </div>
 
-<!-- GAME OVER -->
-<div id="gameover" class="screen fade">
+<div id="gameover" class="screen">
 <h1>Game Over</h1>
-<h2 id="scoreText"></h2>
+<h2 id="score"></h2>
 <button onclick="retry()">Retry</button>
-<button onclick="goHome()">Back to Home</button>
-</div>
-
-<!-- GALLERY -->
-<div id="gallery" class="screen fade">
-<h1>Learning Gallery</h1>
-<img id="galImg">
-<h2 id="galText"></h2>
-<br>
-<button onclick="prev()">Prev</button>
-<button onclick="next()">Next</button>
-<button onclick="speak()">🔊 Speak</button>
-<button onclick="toggleText()">Text ON/OFF</button>
-<br><br>
-<button onclick="goHome()">Back</button>
+<button onclick="goHome()">Home</button>
 </div>
 
 <script>
-let audioOn=true;
+let music=true;
 let score=0;
+let current=0;
 let timer;
 let time=5;
-let current=0;
-let maxQ=15;
 let topic="";
+const maxQ=15;
 
 const data={
-animals:[
-{q:"Which is CAT?", a:"Cat", o:["Dog","Cat","Cow"]},
-{q:"Which is DOG?", a:"Dog", o:["Dog","Fish","Bird"]},
-{q:"Which is BIRD?", a:"Bird", o:["Cow","Bird","Cat"]}
-],
-food:[
-{q:"Which is APPLE?",a:"Apple",o:["Apple","Milk","Rice"]},
-{q:"Which is MILK?",a:"Milk",o:["Cake","Milk","Egg"]}
-],
-numbers:[
-{q:"Which is 1?",a:"1",o:["2","1","3"]},
-{q:"Which is 3?",a:"3",o:["3","5","2"]}
-],
-colors:[
-{q:"Which is RED?",a:"Red",o:["Red","Blue","Green"]},
-{q:"Which is BLUE?",a:"Blue",o:["Yellow","Blue","Red"]}
-],
-transport:[
-{q:"Which is CAR?",a:"Car",o:["Car","Ship","Plane"]},
-{q:"Which is PLANE?",a:"Plane",o:["Bike","Plane","Bus"]}
-]
+animals:["Cat","Dog","Bird","Cow","Fish","Horse","Lion","Tiger","Elephant","Duck","Goat","Sheep","Monkey","Frog","Rabbit"],
+food:["Apple","Rice","Milk","Bread","Cake","Egg","Fish","Soup","Pizza","Banana","Burger","Cheese","Orange","Chicken","Water"],
+numbers:["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"],
+colors:["Red","Blue","Green","Yellow","Black","White","Pink","Purple","Orange","Brown","Gray","Cyan","Magenta","Gold","Silver"],
+letters:["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O"],
+home:["Bed","Table","Chair","Door","Window","Kitchen","Bathroom","Sofa","Lamp","TV","Carpet","Fan","Mirror","Clock","Fridge"],
+body:["Head","Eye","Ear","Nose","Mouth","Hand","Leg","Foot","Arm","Finger","Hair","Tooth","Neck","Back","Knee"],
+hospital:["Doctor","Nurse","Bed","Medicine","Syringe","Wheelchair","Patient","Bandage","Hospital","Ambulance","Thermometer","Mask","Gloves","Room","IV"],
+computer:["Mouse","Keyboard","Monitor","CPU","Printer","Laptop","Screen","Internet","WiFi","File","Folder","Software","Hardware","Camera","Speaker"],
+transport:["Car","Bus","Bike","Train","Plane","Ship","Truck","Taxi","Boat","Motorcycle","Helicopter","Subway","Scooter","Tram","Van"]
 };
 
-const galleryData=[
-{name:"Cat",img:"https://i.imgur.com/2X4QH0v.png"},
-{name:"Dog",img:"https://i.imgur.com/OVC5XxB.png"},
-{name:"Apple",img:"https://i.imgur.com/1cXyG6Y.png"},
-{name:"Car",img:"https://i.imgur.com/lkQKJ9U.png"}
-];
-
-let g=0;
-let showText=true;
-
-function openWorld(){
-show("world");
-}
-function goHome(){
-show("home");
-}
-function openGallery(){
-show("gallery");
-loadGallery();
-}
-
+function openWorld(){show("world");}
+function goHome(){show("home");}
 function show(id){
-document.querySelectorAll('.screen').forEach(s=>s.classList.remove("active"));
+document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 }
 
@@ -195,84 +169,55 @@ topic=t;
 current=0;
 score=0;
 show("game");
-loadQuestion();
+nextQ();
 }
 
-function loadQuestion(){
-if(current>=maxQ || !data[topic][current%data[topic].length]){
-endGame();
-return;
+function nextQ(){
+if(current>=maxQ){end();}
+let correct=data[topic][current];
+document.getElementById("question").innerText="Find: "+correct;
+let opts=[correct];
+while(opts.length<3){
+let r=data[topic][Math.floor(Math.random()*15)];
+if(!opts.includes(r)) opts.push(r);
 }
-let q=data[topic][current%data[topic].length];
-document.getElementById("questionTitle").innerText=q.q;
-let op="";
-q.o.forEach(x=>{
-op+=`<div class="option" onclick="check('${x}')">${x}</div>`;
+opts.sort(()=>Math.random()-0.5);
+let html="";
+opts.forEach(o=>{
+html+=`<div class='option' onclick="answer('${o}','${correct}')">${o}</div>`;
 });
-document.getElementById("options").innerHTML=op;
+document.getElementById("options").innerHTML=html;
 time=5;
 document.getElementById("timer").innerText=time;
-timer=setInterval(countdown,1000);
-}
-
-function countdown(){
+document.getElementById("bar").style.width=(current/maxQ*100)+"%";
+timer=setInterval(()=>{
 time--;
 document.getElementById("timer").innerText=time;
-if(time<=0){
-clearInterval(timer);
-current++;
-loadQuestion();
-}
+if(time<=0){clearInterval(timer);current++;nextQ();}
+},1000);
 }
 
-function check(ans){
+function answer(a,c){
 clearInterval(timer);
-let q=data[topic][current%data[topic].length];
-if(ans==q.a) score++;
+if(a==c){score++;document.getElementById("correct").play();}
+else{document.getElementById("wrong").play();}
 current++;
-loadQuestion();
+nextQ();
 }
 
-function endGame(){
+function end(){
 show("gameover");
-document.getElementById("scoreText").innerText="Score: "+score;
+document.getElementById("score").innerText="Score: "+score+" / 15";
 }
 
-function retry(){
-startGame(topic);
-}
+function retry(){startGame(topic);}
 
-function toggleAudio(){
-audioOn=!audioOn;
-alert("Audio "+(audioOn?"ON":"OFF"));
-}
-
-function loadGallery(){
-document.getElementById("galImg").src=galleryData[g].img;
-document.getElementById("galText").innerText=galleryData[g].name;
-}
-
-function next(){
-g=(g+1)%galleryData.length;
-loadGallery();
-}
-
-function prev(){
-g--;
-if(g<0)g=galleryData.length-1;
-loadGallery();
-}
-
-function speak(){
-if(!audioOn) return;
-let u=new SpeechSynthesisUtterance(galleryData[g].name);
-speechSynthesis.speak(u);
-}
-
-function toggleText(){
-showText=!showText;
-document.getElementById("galText").style.display=showText?"block":"none";
+function toggleMusic(){
+music=!music;
+let bg=document.getElementById("bgm");
+music?bg.play():bg.pause();
 }
 </script>
+
 </body>
 </html>
