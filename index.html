@@ -1,54 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Easy English Adventure</title>
-<style>
-.screen{
-display:none;
-height:100vh;
-width:100vw;
-justify-content:center;
-align-items:center;
-flex-direction:column;
-gap:20px;          /* ← INI YANG PENTING */
-padding:20px;
-box-sizing:border-box;
-text-align:center;
-}
 
+<style>
 body{
 margin:0;
-font-family:'Comic Sans MS';
-background:linear-gradient(#7ddfff,#c2f0ff);
+font-family:"Comic Sans MS",cursive;
+background:linear-gradient(#6bd6ff,#dff6ff);
 overflow:hidden;
 }
 
+/* ===== GLOBAL ===== */
 .screen{
 display:none;
-height:100vh;
 width:100vw;
+height:100vh;
+flex-direction:column;
 justify-content:center;
 align-items:center;
-flex-direction:column;
-animation:fade .5s;
+gap:20px;
+padding:20px;
+box-sizing:border-box;
+text-align:center;
+animation:fade .4s;
 }
 
 @keyframes fade{
-from{opacity:0;}
-to{opacity:1;}
+from{opacity:0;transform:scale(.95);}
+to{opacity:1;transform:scale(1);}
 }
 
 button{
-padding:15px 25px;
+width:100%;
+max-width:300px;
+padding:15px;
 border:none;
 border-radius:20px;
 font-size:18px;
-cursor:pointer;
 background:#ffdd00;
 box-shadow:0 5px #c9a700;
+cursor:pointer;
 }
 
+/* ===== NAVBAR ===== */
 .nav{
 position:fixed;
 top:10px;
@@ -57,42 +54,102 @@ display:flex;
 gap:10px;
 z-index:9999;
 }
-
 .nav button{
-background:#00ffcc;
+width:auto;
+background:#00ffd5;
+}
+
+/* ===== QUIZ ===== */
+#options{
+display:flex;
+flex-direction:column;
+gap:15px;
+width:100%;
+max-width:400px;
+}
+
+.correct{background:#6cff6c!important;}
+.wrong{background:#ff6c6c!important;color:white;}
+
+#timer{
+font-size:28px;
+color:#ff3333;
+}
+
+/* ===== GALLERY ===== */
+#galleryControls{
+display:flex;
+gap:20px;
+}
+
+/* ===== MOBILE ===== */
+@media(max-width:600px){
+h1{font-size:26px;}
+h2{font-size:22px;}
 }
 </style>
 </head>
 
 <body>
 
+<!-- NAV -->
 <div class="nav">
 <button onclick="goHome()">🏠</button>
 <button onclick="toggleMusic()">🎵</button>
 </div>
 
+<!-- START OVERLAY -->
 <div id="overlay" class="screen" style="display:flex;background:#000a;color:white;">
-<h2>Click anywhere to start 🎵</h2>
+<h2>Tap anywhere to start 🎵</h2>
 </div>
 
-<div id="home" class="screen" style="display:flex">
+<!-- HOME -->
+<div id="home" class="screen">
 <h1>Easy English Adventure</h1>
 <button onclick="show('map')">Start Adventure</button>
 <button onclick="show('gallery')">Learning Gallery</button>
 </div>
 
+<!-- MAP -->
+<div id="map" class="screen">
+<h2>Adventure Map</h2>
+<div style="font-size:60px">🐼 ➡ 🐶 ➡ 🦁</div>
+<button onclick="startGame('animals')">Animals World</button>
+<button onclick="startGame('food')">Food World</button>
+<button onclick="startGame('colors')">Color World</button>
+</div>
+
+<!-- GAME -->
+<div id="game" class="screen">
+<h2 id="question"></h2>
+<div id="timer"></div>
+<div id="options"></div>
+</div>
+
+<!-- GALLERY -->
+<div id="gallery" class="screen">
+<div id="gIcon" style="font-size:120px;"></div>
+<div id="gText" style="font-size:30px;"></div>
+<div id="galleryControls">
+<button onclick="prev()">⬅</button>
+<button onclick="speak()">🔊</button>
+<button onclick="next()">➡</button>
+</div>
+</div>
+
+<!-- AUDIO -->
 <audio id="bgm" loop src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5c9b76cc38.mp3"></audio>
 <audio id="correctSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_29efbd7bfa.mp3"></audio>
 <audio id="wrongSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5f8b7e18f0.mp3"></audio>
 
 <script>
+/* ===== BASE ===== */
 let bgm=document.getElementById("bgm");
-
 document.getElementById("overlay").onclick=function(){
 bgm.play();
 this.style.display="none";
 show("home");
-}
+};
 
 function toggleMusic(){
 if(bgm.paused) bgm.play();
@@ -103,46 +160,71 @@ function show(id){
 document.querySelectorAll(".screen").forEach(s=>s.style.display="none");
 document.getElementById(id).style.display="flex";
 }
+function goHome(){show("home");}
 
-function goHome(){
-show("home");
-}
-</script>
-#options{
-display:flex;
-flex-direction:column;
-gap:15px;
-width:100%;
-max-width:400px;
-}
+/* ===== QUIZ DATA ===== */
+const data={
+animals:["Cat","Dog","Cow","Fish","Bird","Lion","Tiger","Elephant","Monkey","Rabbit","Duck","Goat","Horse","Sheep","Frog"],
+food:["Apple","Rice","Milk","Bread","Cake","Egg","Pizza","Banana","Fish","Soup","Cheese","Burger","Orange","Chicken","Water"],
+colors:["Red","Blue","Green","Yellow","Black","White","Pink","Purple","Orange","Brown","Gray","Cyan","Gold","Silver","Violet"]
+};
 
-#options button{
-width:100%;
-padding:15px;
-border-radius:15px;
-font-size:18px;
-}
-#home button,
-#map button{
-margin:10px 0;
-width:250px;
-}
-#gallery{
-gap:20px;
+let world="",q=0,timer=null;
+
+function startGame(w){
+world=w;
+q=0;
+show("game");
+loadQ();
 }
 
-#gallery button{
-width:80px;
-}
-<div id="gallery" class="screen">
-<div id="gIcon"></div>
-<div id="gText"></div>
-<button onclick="prev()">⬅</button>
-<button onclick="speak()">🔊</button>
-<button onclick="next()">➡</button>
-</div>
+function loadQ(){
+clearInterval(timer);
+let list=data[world];
+let correct=list[q];
+question.innerText="Find: "+correct;
 
-<script>
+options.innerHTML="";
+let opts=[correct];
+while(opts.length<3){
+let r=list[Math.floor(Math.random()*15)];
+if(!opts.includes(r)) opts.push(r);
+}
+opts.sort(()=>Math.random()-0.5);
+
+opts.forEach(o=>{
+let b=document.createElement("button");
+b.innerText=o;
+b.onclick=()=>pick(o,correct,b);
+options.appendChild(b);
+});
+
+let t=5;
+timer=setInterval(()=>{
+timerEl.innerText=t;
+t--;
+if(t<0){
+clearInterval(timer);
+nextQ();
+}
+},1000);
+timerEl.innerText=5;
+}
+
+function pick(a,c,btn){
+clearInterval(timer);
+if(a==c){btn.classList.add("correct");correctSound.play();}
+else{btn.classList.add("wrong");wrongSound.play();}
+setTimeout(nextQ,700);
+}
+
+function nextQ(){
+q++;
+if(q<15) loadQ();
+else goHome();
+}
+
+/* ===== GALLERY ===== */
 const gallery=[
 {name:"Cat",icon:"🐱"},
 {name:"Dog",icon:"🐶"},
@@ -152,15 +234,11 @@ const gallery=[
 ];
 let gi=0;
 
-function showGallery(){
-show("gallery");
-render();
-}
-
 function render(){
 gIcon.innerText=gallery[gi].icon;
 gText.innerText=gallery[gi].name;
 }
+render();
 
 function next(){gi=(gi+1)%gallery.length;render();}
 function prev(){gi=(gi-1+gallery.length)%gallery.length;render();}
@@ -169,3 +247,5 @@ speechSynthesis.speak(new SpeechSynthesisUtterance(gallery[gi].name));
 }
 </script>
 
+</body>
+</html>
