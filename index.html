@@ -5,43 +5,56 @@
 <title>Easy English Adventure</title>
 
 <style>
+*{box-sizing:border-box;}
 body{
 margin:0;
 font-family:'Comic Sans MS',cursive;
-background:linear-gradient(#6dd5fa,#2980b9);
+background:linear-gradient(#5ee7df,#b490ca);
 overflow:hidden;
-text-align:center;
-}
-
-.cloud{
-position:absolute;
-background:white;
-border-radius:50px;
-opacity:0.6;
-animation:moveCloud 40s linear infinite;
-}
-
-@keyframes moveCloud{
-0%{left:-200px;}
-100%{left:100%;}
+color:#fff;
 }
 
 .screen{
 display:none;
+min-height:100vh;
 padding:20px;
+animation:fade .6s;
 }
-.active{display:block;}
+.active{display:flex;}
 
-h1{
-color:white;
-font-size:42px;
-text-shadow:4px 4px #000;
-animation:bounce 2s infinite;
+@keyframes fade{
+from{opacity:0;}
+to{opacity:1;}
 }
 
-@keyframes bounce{
-0%,100%{transform:translateY(0);}
-50%{transform:translateY(-10px);}
+.topbar{
+position:absolute;
+top:10px;
+right:10px;
+z-index:1000;
+display:flex;
+gap:10px;
+}
+
+.topbar button{
+background:#ffdd00;
+border:none;
+border-radius:10px;
+padding:10px;
+cursor:pointer;
+font-weight:bold;
+}
+
+.center{
+margin:auto;
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:15px;
+}
+
+h1,h2{
+text-shadow:3px 3px #000;
 }
 
 button{
@@ -49,174 +62,225 @@ padding:15px 30px;
 border:none;
 border-radius:20px;
 font-size:18px;
-background:#ffdd00;
-box-shadow:4px 4px #333;
+background:#ffcc00;
+box-shadow:3px 3px #333;
 cursor:pointer;
-margin:10px;
 }
-
-button:hover{transform:scale(1.1);}
 
 .option{
-background:#7efaff;
+background:#fff;
+color:#000;
 padding:15px;
-margin:10px auto;
-width:250px;
 border-radius:15px;
-cursor:pointer;
+width:250px;
 font-size:18px;
-box-shadow:3px 3px #333;
+cursor:pointer;
+transition:.3s;
 }
 
-#timer{font-size:30px;color:red;}
+.option.correct{background:#4cff4c;}
+.option.wrong{background:#ff4c4c;color:white;}
+
+#timer{
+font-size:28px;
+color:#ff4444;
+}
 
 .progress{
 width:80%;
 height:20px;
-background:#fff;
-margin:auto;
+background:#ddd;
 border-radius:10px;
 overflow:hidden;
 }
-
 .progress div{
 height:100%;
 background:#00ff00;
 width:0%;
 }
 
+#soundGate{
+position:fixed;
+top:0;left:0;right:0;bottom:0;
+background:rgba(0,0,0,.8);
+color:white;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:24px;
+z-index:2000;
+cursor:pointer;
+}
 </style>
 </head>
 
 <body>
 
-<div class="cloud" style="top:50px;width:200px;height:60px;animation-duration:60s"></div>
-<div class="cloud" style="top:150px;width:300px;height:80px;animation-duration:80s"></div>
+<div id="soundGate" onclick="unlockSound()">👉 Click anywhere to start sound 👈</div>
 
 <audio id="bgm" loop src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_0d82b1f3f3.mp3"></audio>
-<audio id="correct" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_6b9a2e0c3a.mp3"></audio>
-<audio id="wrong" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_76b81b0b20.mp3"></audio>
+<audio id="correctSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_6b9a2e0c3a.mp3"></audio>
+<audio id="wrongSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_76b81b0b20.mp3"></audio>
 
+<div class="topbar">
+<button onclick="goHome()">🏠 Home</button>
+<button onclick="toggleMusic()">🎵 Music</button>
+</div>
+
+<!-- HOME -->
 <div id="home" class="screen active">
+<div class="center">
 <h1>Easy English Adventure</h1>
 <button onclick="openWorld()">Start Adventure</button>
 <button onclick="openWorld()">Choose World</button>
-<button onclick="openGallery()">Learning Gallery</button>
-<br><br>
-<button onclick="toggleMusic()">🎵 Music ON/OFF</button>
+</div>
 </div>
 
+<!-- WORLD -->
 <div id="world" class="screen">
-<h1>Select World</h1>
+<div class="center">
+<h2>Select Topic</h2>
 <button onclick="startGame('animals')">Animals</button>
 <button onclick="startGame('food')">Food</button>
 <button onclick="startGame('numbers')">Numbers</button>
 <button onclick="startGame('colors')">Colors</button>
 <button onclick="startGame('letters')">Letters</button>
-<button onclick="startGame('home')">Home</button>
-<button onclick="startGame('body')">Body</button>
-<button onclick="startGame('hospital')">Hospital</button>
-<button onclick="startGame('computer')">Computer</button>
 <button onclick="startGame('transport')">Transport</button>
-<button onclick="goHome()">Back</button>
+</div>
 </div>
 
+<!-- GAME -->
 <div id="game" class="screen">
-<h1 id="question"></h1>
+<div class="center">
+<h2 id="question"></h2>
 <div id="timer">5</div>
 <div class="progress"><div id="bar"></div></div>
 <div id="options"></div>
 </div>
+</div>
 
+<!-- GAME OVER -->
 <div id="gameover" class="screen">
-<h1>Game Over</h1>
-<h2 id="score"></h2>
+<div class="center">
+<h1 id="resultMsg"></h1>
+<h2 id="scoreText"></h2>
 <button onclick="retry()">Retry</button>
 <button onclick="goHome()">Home</button>
 </div>
+</div>
 
 <script>
-let music=true;
+let audioUnlocked=false;
+let musicOn=true;
 let score=0;
 let current=0;
-let timer;
 let time=5;
+let timer;
 let topic="";
-const maxQ=15;
 
+const maxQ=15;
 const data={
 animals:["Cat","Dog","Bird","Cow","Fish","Horse","Lion","Tiger","Elephant","Duck","Goat","Sheep","Monkey","Frog","Rabbit"],
 food:["Apple","Rice","Milk","Bread","Cake","Egg","Fish","Soup","Pizza","Banana","Burger","Cheese","Orange","Chicken","Water"],
 numbers:["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"],
-colors:["Red","Blue","Green","Yellow","Black","White","Pink","Purple","Orange","Brown","Gray","Cyan","Magenta","Gold","Silver"],
+colors:["Red","Blue","Green","Yellow","Black","White","Pink","Purple","Orange","Brown","Gray","Cyan","Gold","Silver","Violet"],
 letters:["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O"],
-home:["Bed","Table","Chair","Door","Window","Kitchen","Bathroom","Sofa","Lamp","TV","Carpet","Fan","Mirror","Clock","Fridge"],
-body:["Head","Eye","Ear","Nose","Mouth","Hand","Leg","Foot","Arm","Finger","Hair","Tooth","Neck","Back","Knee"],
-hospital:["Doctor","Nurse","Bed","Medicine","Syringe","Wheelchair","Patient","Bandage","Hospital","Ambulance","Thermometer","Mask","Gloves","Room","IV"],
-computer:["Mouse","Keyboard","Monitor","CPU","Printer","Laptop","Screen","Internet","WiFi","File","Folder","Software","Hardware","Camera","Speaker"],
 transport:["Car","Bus","Bike","Train","Plane","Ship","Truck","Taxi","Boat","Motorcycle","Helicopter","Subway","Scooter","Tram","Van"]
 };
 
-function openWorld(){show("world");}
-function goHome(){show("home");}
+function unlockSound(){
+audioUnlocked=true;
+document.getElementById("soundGate").style.display="none";
+if(musicOn) document.getElementById("bgm").play();
+}
+
+function toggleMusic(){
+musicOn=!musicOn;
+let bgm=document.getElementById("bgm");
+if(musicOn && audioUnlocked) bgm.play();
+else bgm.pause();
+}
+
 function show(id){
 document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 }
 
+function openWorld(){show("world");}
+function goHome(){show("home");}
+
 function startGame(t){
 topic=t;
-current=0;
 score=0;
+current=0;
 show("game");
 nextQ();
 }
 
 function nextQ(){
-if(current>=maxQ){end();}
+if(current>=maxQ){endGame();return;}
 let correct=data[topic][current];
 document.getElementById("question").innerText="Find: "+correct;
+
 let opts=[correct];
 while(opts.length<3){
 let r=data[topic][Math.floor(Math.random()*15)];
 if(!opts.includes(r)) opts.push(r);
 }
 opts.sort(()=>Math.random()-0.5);
+
 let html="";
 opts.forEach(o=>{
-html+=`<div class='option' onclick="answer('${o}','${correct}')">${o}</div>`;
+html+=`<div class="option" onclick="answer(this,'${o}','${correct}')">${o}</div>`;
 });
 document.getElementById("options").innerHTML=html;
+
 time=5;
 document.getElementById("timer").innerText=time;
 document.getElementById("bar").style.width=(current/maxQ*100)+"%";
+
 timer=setInterval(()=>{
 time--;
 document.getElementById("timer").innerText=time;
-if(time<=0){clearInterval(timer);current++;nextQ();}
-},1000);
-}
-
-function answer(a,c){
+if(time<=0){
 clearInterval(timer);
-if(a==c){score++;document.getElementById("correct").play();}
-else{document.getElementById("wrong").play();}
 current++;
 nextQ();
 }
+},1000);
+}
 
-function end(){
+function answer(el,a,c){
+clearInterval(timer);
+let options=document.querySelectorAll(".option");
+options.forEach(o=>o.style.pointerEvents="none");
+
+if(a==c){
+el.classList.add("correct");
+score++;
+if(audioUnlocked) document.getElementById("correctSound").play();
+}else{
+el.classList.add("wrong");
+if(audioUnlocked) document.getElementById("wrongSound").play();
+}
+
+setTimeout(()=>{
+current++;
+nextQ();
+},800);
+}
+
+function endGame(){
 show("gameover");
-document.getElementById("score").innerText="Score: "+score+" / 15";
+document.getElementById("scoreText").innerText="Score: "+score+" / 15";
+let msg="Keep Learning!";
+if(score==15) msg="Fantastic!";
+else if(score>10) msg="Great Job!";
+else if(score>5) msg="Nice Try!";
+document.getElementById("resultMsg").innerText=msg;
 }
 
 function retry(){startGame(topic);}
-
-function toggleMusic(){
-music=!music;
-let bg=document.getElementById("bgm");
-music?bg.play():bg.pause();
-}
 </script>
 
 </body>
