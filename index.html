@@ -1,68 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>Easy English Adventure</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
-*{box-sizing:border-box;}
 body{
 margin:0;
-font-family:'Comic Sans MS',cursive;
-background:linear-gradient(#6dd5fa,#c77dff);
-min-height:100vh;
-color:white;
-overflow-x:hidden;
+font-family:'Comic Sans MS';
+background:linear-gradient(#7ddfff,#c2f0ff);
+overflow:hidden;
 }
 
-/* ===== AUTOPLAY OVERLAY ===== */
-#startOverlay{
-position:fixed;
-top:0;left:0;right:0;bottom:0;
-background:rgba(0,0,0,0.85);
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:28px;
-z-index:10000;
-cursor:pointer;
-text-align:center;
-padding:20px;
-}
-
-/* ===== TOP BAR ===== */
-.topbar{
-position:fixed;
-top:10px;
-right:10px;
-z-index:9999;
-display:flex;
-gap:10px;
-}
-.topbar button{
-background:#ffdd00;
-border:none;
-border-radius:12px;
-padding:12px 18px;
-font-size:14px;
-font-weight:bold;
-cursor:pointer;
-box-shadow:3px 3px #000;
-}
-
-/* ===== SCREEN SYSTEM ===== */
 .screen{
 display:none;
-min-height:100vh;
-padding:90px 20px 30px;
-animation:fade .6s;
-}
-.active{
-display:flex;
-flex-direction:column;
+height:100vh;
+width:100vw;
+justify-content:center;
 align-items:center;
-gap:20px;
+flex-direction:column;
+animation:fade .5s;
 }
 
 @keyframes fade{
@@ -70,444 +26,180 @@ from{opacity:0;}
 to{opacity:1;}
 }
 
-h1,h2{
-text-shadow:3px 3px #000;
-text-align:center;
-}
-
-/* ===== BUTTON ===== */
-button.main{
-padding:15px 30px;
-border-radius:20px;
+button{
+padding:15px 25px;
 border:none;
+border-radius:20px;
 font-size:18px;
-background:#ffcc00;
 cursor:pointer;
-box-shadow:3px 3px #000;
+background:#ffdd00;
+box-shadow:0 5px #c9a700;
 }
 
-/* ===== RESPONSIVE ===== */
-@media(max-width:600px){
-h1{font-size:28px;}
-button.main{font-size:16px;}
+.nav{
+position:fixed;
+top:10px;
+right:10px;
+display:flex;
+gap:10px;
+z-index:9999;
+}
+
+.nav button{
+background:#00ffcc;
 }
 </style>
 </head>
 
 <body>
 
-<!-- ===== AUTOPLAY FIX ===== -->
-<div id="startOverlay">👉 Klik di mana saja untuk mulai & aktifkan suara 👈</div>
-
-<!-- ===== TOP BAR ===== -->
-<div class="topbar">
-  <button onclick="goHome()">🏠 Home</button>
-  <button id="musicBtn">🎵 Music</button>
+<div class="nav">
+<button onclick="goHome()">🏠</button>
+<button onclick="toggleMusic()">🎵</button>
 </div>
 
-<!-- ===== HOME ===== -->
-<div id="home" class="screen active">
-  <h1>Easy English Adventure</h1>
-  <button class="main" onclick="openMap()">Start Adventure</button>
-  <button class="main" onclick="openGallery()">Learning Gallery</button>
+<div id="overlay" class="screen" style="display:flex;background:#000a;color:white;">
+<h2>Click anywhere to start 🎵</h2>
 </div>
 
-<!-- ===== MAP (akan diisi di Bagian B) ===== -->
-<div id="map" class="screen">
-  <h2>Adventure Map</h2>
-  <div id="mapArea">Loading map...</div>
+<div id="home" class="screen" style="display:flex">
+<h1>Easy English Adventure</h1>
+<button onclick="show('map')">Start Adventure</button>
+<button onclick="show('gallery')">Learning Gallery</button>
 </div>
 
-<!-- ===== GAME (akan diisi di Bagian C) ===== -->
-<div id="game" class="screen">
-  <h2 id="question">Question</h2>
-  <div id="gameArea">Loading game...</div>
-</div>
-
-<!-- ===== GALLERY (akan diisi di Bagian D) ===== -->
-<div id="gallery" class="screen">
-  <h2>Learning Gallery</h2>
-  <div id="galleryArea">Loading gallery...</div>
-</div>
-
-<!-- ===== AUDIO ===== -->
-<audio id="bgm" loop src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_0d82b1f3f3.mp3"></audio>
-<audio id="correctSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_6b9a2e0c3a.mp3"></audio>
-<audio id="wrongSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_76b81b0b20.mp3"></audio>
+<audio id="bgm" loop src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5c9b76cc38.mp3"></audio>
+<audio id="correctSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_29efbd7bfa.mp3"></audio>
+<audio id="wrongSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5f8b7e18f0.mp3"></audio>
 
 <script>
-let audioUnlocked=false;
-const bgm=document.getElementById("bgm");
+let bgm=document.getElementById("bgm");
 
-/* ===== AUTOPLAY FIX ===== */
-document.getElementById("startOverlay").addEventListener("click",()=>{
-audioUnlocked=true;
+document.getElementById("overlay").onclick=function(){
 bgm.play();
-document.getElementById("startOverlay").style.display="none";
-});
+this.style.display="none";
+show("home");
+}
 
-/* ===== MUSIC BUTTON ===== */
-document.getElementById("musicBtn").addEventListener("click",()=>{
-if(!audioUnlocked) return;
+function toggleMusic(){
 if(bgm.paused) bgm.play();
 else bgm.pause();
-});
+}
 
-/* ===== SCREEN CONTROL ===== */
 function show(id){
-document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-document.getElementById(id).classList.add("active");
-}
-function goHome(){show("home");}
-function openMap(){show("map");}
-function openGallery(){show("gallery");}
-</script>
-
-</body>
-</html>
-<!-- ================= BAGIAN B : AVATAR & MAP ================= -->
-
-<style>
-/* ===== AVATAR ===== */
-#avatarSelect{
-display:flex;
-gap:20px;
-flex-wrap:wrap;
-justify-content:center;
-}
-.avatarCard{
-background:white;
-color:black;
-padding:15px;
-border-radius:15px;
-cursor:pointer;
-width:120px;
-box-shadow:3px 3px #000;
-transition:.3s;
-}
-.avatarCard:hover{transform:scale(1.1);}
-.avatarImg{
-font-size:50px;
+document.querySelectorAll(".screen").forEach(s=>s.style.display="none");
+document.getElementById(id).style.display="flex";
 }
 
-/* ===== MAP ===== */
-#mapArea{
-display:flex;
-flex-direction:column;
-align-items:center;
-gap:25px;
-margin-top:20px;
-}
-
-.mapNode{
-background:white;
-color:black;
-padding:15px 25px;
-border-radius:30px;
-font-weight:bold;
-cursor:pointer;
-box-shadow:3px 3px #000;
-position:relative;
-}
-.mapNode.locked{
-background:#aaa;
-color:#555;
-cursor:not-allowed;
-}
-.mapNode.done{
-background:#7CFF7C;
-}
-.mapLine{
-width:4px;
-height:40px;
-background:white;
-}
-</style>
-
-<script>
-/* ===== AVATAR DATA ===== */
-let playerAvatar=null;
-const avatars=[
- {name:"Panda",icon:"🐼"},
- {name:"Puppy",icon:"🐶"},
- {name:"Kitty",icon:"🐱"},
- {name:"Bunny",icon:"🐰"}
-];
-
-/* ===== WORLD DATA ===== */
-const worlds=[
- {id:"animals",name:"🌳 Animals Forest"},
- {id:"food",name:"🍎 Food Town"},
- {id:"colors",name:"🎨 Color Hills"},
- {id:"numbers",name:"🔢 Number Valley"},
- {id:"transport",name:"🚗 Transport City"}
-];
-let unlockedWorld=0;
-
-/* ===== LOAD MAP ===== */
-function loadMap(){
-const map=document.getElementById("mapArea");
-map.innerHTML="";
-
-if(!playerAvatar){
-map.innerHTML="<h3>Choose Your Animal Hero</h3><div id='avatarSelect'></div>";
-let avDiv=document.getElementById("avatarSelect");
-avatars.forEach(a=>{
-avDiv.innerHTML+=`
-<div class="avatarCard" onclick="selectAvatar('${a.name}')">
-<div class="avatarImg">${a.icon}</div>
-${a.name}
-</div>`;
-});
-return;
-}
-
-worlds.forEach((w,i)=>{
-let cls="mapNode";
-if(i<unlockedWorld) cls+=" done";
-if(i>unlockedWorld) cls+=" locked";
-
-map.innerHTML+=`
-<div class="${cls}" onclick="openWorldFromMap(${i})">${w.name}</div>
-${i<worlds.length-1?'<div class="mapLine"></div>':""}`;
-});
-}
-
-/* ===== SELECT AVATAR ===== */
-function selectAvatar(name){
-playerAvatar=name;
-loadMap();
-}
-
-/* ===== OPEN WORLD ===== */
-function openWorldFromMap(i){
-if(i!=unlockedWorld) return;
-startGame(worlds[i].id);
-}
-
-/* ===== EXTEND openMap() ===== */
-const _openMap=openMap;
-openMap=function(){
-show("map");
-loadMap();
+function goHome(){
+show("home");
 }
 </script>
-<!-- ================= BAGIAN C : GAME QUIZ ================= -->
-
-<style>
-#gameArea{
-width:100%;
-max-width:500px;
-display:flex;
-flex-direction:column;
-gap:15px;
-align-items:center;
-}
-
-#timer{
-font-size:28px;
-color:#ff5555;
-}
-
-#progressBar{
-width:100%;
-height:20px;
-background:#ddd;
-border-radius:10px;
-overflow:hidden;
-}
-#progressFill{
-height:100%;
-background:#4cff4c;
-width:0%;
-}
-
-.optionBox{
-display:flex;
-flex-direction:column;
-gap:15px;
-width:100%;
-}
-.option{
-background:white;
-color:black;
-padding:15px;
-border-radius:15px;
-cursor:pointer;
-font-size:18px;
-width:100%;
-}
-.option.correct{background:#4cff4c;}
-.option.wrong{background:#ff4c4c;color:white;}
-</style>
+<div id="map" class="screen">
+<h2>Choose Your World</h2>
+<div>
+🐼 ➡ 🐶 ➡ 🦁 ➡ 🐸
+</div>
+<button onclick="startGame('animals')">Animals</button>
+<button onclick="startGame('food')">Food</button>
+<button onclick="startGame('colors')">Colors</button>
+</div>
+<div id="game" class="screen">
+<h2 id="question"></h2>
+<div id="timer"></div>
+<div id="options"></div>
+</div>
 
 <script>
-const quizData={
-animals:["Cat","Dog","Bird","Cow","Fish","Horse","Lion","Tiger","Elephant","Duck","Goat","Sheep","Monkey","Frog","Rabbit"],
-food:["Apple","Rice","Milk","Bread","Cake","Egg","Fish","Soup","Pizza","Banana","Burger","Cheese","Orange","Chicken","Water"],
-colors:["Red","Blue","Green","Yellow","Black","White","Pink","Purple","Orange","Brown","Gray","Cyan","Gold","Silver","Violet"],
-numbers:["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"],
-transport:["Car","Bus","Bike","Train","Plane","Ship","Truck","Taxi","Boat","Motorcycle","Helicopter","Subway","Scooter","Tram","Van"]
+const data={
+animals:["Cat","Dog","Cow","Fish","Bird","Lion","Tiger","Elephant","Monkey","Rabbit","Duck","Goat","Horse","Sheep","Frog"],
+food:["Apple","Rice","Milk","Bread","Cake","Egg","Pizza","Banana","Fish","Soup","Cheese","Burger","Orange","Chicken","Water"],
+colors:["Red","Blue","Green","Yellow","Black","White","Pink","Purple","Orange","Brown","Gray","Cyan","Gold","Silver","Violet"]
 };
 
-let currentQ=0;
-let score=0;
-let currentWorld="";
-let quizTimer=null; 
+let world="";
+let q=0;
+let timer;
 
-function startGame(world){
-currentWorld=world;
-currentQ=0;
-score=0;
+function startGame(w){
+world=w;
+q=0;
 show("game");
-loadQuestion();
+loadQ();
 }
 
-function loadQuestion(){
-const list=quizData[currentWorld];
-if(currentQ>=15){
-endWorld();
-return;
-}
-
-const correct=list[currentQ];
+function loadQ(){
+clearInterval(timer);
+let list=data[world];
+let correct=list[q];
 document.getElementById("question").innerText="Find: "+correct;
 
-let options=[correct];
-while(options.length<3){
+let opts=[correct];
+while(opts.length<3){
 let r=list[Math.floor(Math.random()*15)];
-if(!options.includes(r)) options.push(r);
+if(!opts.includes(r)) opts.push(r);
 }
-options.sort(()=>Math.random()-0.5);
+opts.sort(()=>Math.random()-0.5);
 
-document.getElementById("gameArea").innerHTML=`
-<div id="timer">5</div>
-<div id="progressBar"><div id="progressFill"></div></div>
-<div class="optionBox">
-${options.map(o=>`<div class="option" onclick="selectAnswer(this,'${o}','${correct}')">${o}</div>`).join("")}
-</div>`;
+let html="";
+opts.forEach(o=>{
+html+=`<button onclick="pick('${o}','${correct}')">${o}</button>`;
+});
+document.getElementById("options").innerHTML=html;
 
-let time=5;
-document.getElementById("progressFill").style.width=(currentQ/15*100)+"%";
-function selectAnswer(el,a,c){
-clearInterval(quizTimer);   
-document.querySelectorAll(".option").forEach(o=>o.style.pointerEvents="none");
-if(quizTimer) clearInterval(quizTimer);   
-
-quizTimer=setInterval(()=>{
-
-time--;
-document.getElementById("timer").innerText=time;
-if(time<=0){
-clearInterval(t);
-currentQ++;
-loadQuestion();
+let t=5;
+document.getElementById("timer").innerText=t;
+timer=setInterval(()=>{
+t--;
+document.getElementById("timer").innerText=t;
+if(t==0){
+q++;
+if(q<15) loadQ();
+else show("home");
 }
 },1000);
 }
 
-function selectAnswer(el,a,c){
-document.querySelectorAll(".option").forEach(o=>o.style.pointerEvents="none");
-if(a==c){
-el.classList.add("correct");
-score++;
-document.getElementById("correctSound").play();
-}else{
-el.classList.add("wrong");
-document.getElementById("wrongSound").play();
-}
-setTimeout(()=>{
-currentQ++;
-loadQuestion();
-},800);
-}
-
-function endWorld(){
-unlockedWorld++;
-show("map");
-loadMap();
-alert("World complete! ⭐");
+function pick(a,c){
+clearInterval(timer);
+if(a==c) correctSound.play();
+else wrongSound.play();
+q++;
+if(q<15) setTimeout(loadQ,500);
+else show("home");
 }
 </script>
-<!-- ================= BAGIAN D : LEARNING GALLERY ================= -->
-
-<style>
-#galleryArea{
-display:flex;
-flex-direction:column;
-align-items:center;
-gap:20px;
-}
-#galleryImg{
-font-size:120px;
-}
-#galleryText{
-font-size:28px;
-font-weight:bold;
-text-shadow:2px 2px #000;
-}
-.galleryControls{
-display:flex;
-gap:15px;
-}
-.galleryControls button{
-padding:10px 20px;
-border-radius:15px;
-border:none;
-background:#ffdd00;
-font-size:18px;
-cursor:pointer;
-box-shadow:3px 3px #000;
-}
-</style>
+<div id="gallery" class="screen">
+<div id="gIcon"></div>
+<div id="gText"></div>
+<button onclick="prev()">⬅</button>
+<button onclick="speak()">🔊</button>
+<button onclick="next()">➡</button>
+</div>
 
 <script>
-const galleryData=[
- {name:"Cat",icon:"🐱"},
- {name:"Dog",icon:"🐶"},
- {name:"Apple",icon:"🍎"},
- {name:"Car",icon:"🚗"},
- {name:"Bus",icon:"🚌"},
- {name:"Banana",icon:"🍌"},
- {name:"Lion",icon:"🦁"},
- {name:"Fish",icon:"🐟"}
+const gallery=[
+{name:"Cat",icon:"🐱"},
+{name:"Dog",icon:"🐶"},
+{name:"Apple",icon:"🍎"},
+{name:"Car",icon:"🚗"},
+{name:"Bus",icon:"🚌"}
 ];
-let gIndex=0;
+let gi=0;
 
-function loadGallery(){
+function showGallery(){
 show("gallery");
-renderGallery();
+render();
 }
 
-function renderGallery(){
-const item=galleryData[gIndex];
-document.getElementById("galleryArea").innerHTML=`
-<div id="galleryImg">${item.icon}</div>
-<div id="galleryText">${item.name}</div>
-<div class="galleryControls">
-<button onclick="prevItem()">⏮</button>
-<button onclick="speakItem()">🔊</button>
-<button onclick="nextItem()">⏭</button>
-</div>`;
+function render(){
+gIcon.innerText=gallery[gi].icon;
+gText.innerText=gallery[gi].name;
 }
 
-function nextItem(){
-gIndex=(gIndex+1)%galleryData.length;
-renderGallery();
-}
-function prevItem(){
-gIndex--;
-if(gIndex<0) gIndex=galleryData.length-1;
-renderGallery();
-}
-function speakItem(){
-let u=new SpeechSynthesisUtterance(galleryData[gIndex].name);
-speechSynthesis.speak(u);
-}
-
-/* Override openGallery from Part A */
-const _openGallery=openGallery;
-openGallery=function(){
-loadGallery();
+function next(){gi=(gi+1)%gallery.length;render();}
+function prev(){gi=(gi-1+gallery.length)%gallery.length;render();}
+function speak(){
+speechSynthesis.speak(new SpeechSynthesisUtterance(gallery[gi].name));
 }
 </script>
