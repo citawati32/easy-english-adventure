@@ -108,7 +108,7 @@ button.main{font-size:16px;}
 <!-- ===== HOME ===== -->
 <div id="home" class="screen active">
   <h1>Easy English Adventure</h1>
-  <button class="main" onclick="starGame('animals') ">Start Adventure</button>
+  <button class="main" onclick="openMap()">Start Adventure</button>
   <button class="main" onclick="openGallery()">Learning Gallery</button>
 </div>
 
@@ -292,106 +292,139 @@ show("map");
 loadMap();
 }
 </script>
+<!-- ================= BAGIAN C : GAME QUIZ ================= -->
+
+<style>
+#gameArea{
+width:100%;
+max-width:500px;
+display:flex;
+flex-direction:column;
+gap:15px;
+align-items:center;
+}
+
+#timer{
+font-size:28px;
+color:#ff5555;
+}
+
+#progressBar{
+width:100%;
+height:20px;
+background:#ddd;
+border-radius:10px;
+overflow:hidden;
+}
+#progressFill{
+height:100%;
+background:#4cff4c;
+width:0%;
+}
+
+.optionBox{
+display:flex;
+flex-direction:column;
+gap:15px;
+width:100%;
+}
+.option{
+background:white;
+color:black;
+padding:15px;
+border-radius:15px;
+cursor:pointer;
+font-size:18px;
+width:100%;
+}
+.option.correct{background:#4cff4c;}
+.option.wrong{background:#ff4c4c;color:white;}
+</style>
+
 <script>
-const quizData = {
-    animals: ["Cat", "Dog", "Bird", "Cow", "Fish", "Horse", "Lion", "Tiger", "Elephant", "Duck", "Goat", "Sheep", "Monkey", "Frog", "Rabbit"],
-    food: ["Apple", "Rice", "Milk", "Bread", "Cake", "Egg", "Fish", "Soup", "Pizza", "Banana", "Burger", "Cheese", "Orange", "Chicken", "Water"],
-    colors: ["Red", "Blue", "Green", "Yellow", "Black", "White", "Pink", "Purple", "Orange", "Brown", "Gray", "Cyan", "Gold", "Silver", "Violet"],
-    numbers: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"],
-    transport: ["Car", "Bus", "Bike", "Train", "Plane", "Ship", "Truck", "Taxi", "Boat", "Motorcycle", "Helicopter", "Subway", "Scooter", "Tram", "Van"]
+const quizData={
+animals:["Cat","Dog","Bird","Cow","Fish","Horse","Lion","Tiger","Elephant","Duck","Goat","Sheep","Monkey","Frog","Rabbit"],
+food:["Apple","Rice","Milk","Bread","Cake","Egg","Fish","Soup","Pizza","Banana","Burger","Cheese","Orange","Chicken","Water"],
+colors:["Red","Blue","Green","Yellow","Black","White","Pink","Purple","Orange","Brown","Gray","Cyan","Gold","Silver","Violet"],
+numbers:["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"],
+transport:["Car","Bus","Bike","Train","Plane","Ship","Truck","Taxi","Boat","Motorcycle","Helicopter","Subway","Scooter","Tram","Van"]
 };
 
-let currentQ = 0;
-let score = 0;
-let currentWorld = "";
-let quizTimer = null; 
+let currentQ=0;
+let score=0;
+let currentWorld="";
 
-function startGame(world) {
-    currentWorld = world;
-    currentQ = 0;
-    score = 0;
-    show("game");
-    loadQuestion();
+function startGame(world){
+currentWorld=world;
+currentQ=0;
+score=0;
+show("game");
+loadQuestion();
 }
 
-function loadQuestion() {
-    // Berhenti hitung mundur lama setiap ganti soal
-    if (quizTimer) clearInterval(quizTimer);
-
-    const list = quizData[currentWorld];
-    
-    // Selesai setelah 15 soal
-    if (currentQ >= 15) {
-        endWorld();
-        return;
-    }
-
-    const correct = list[currentQ];
-    document.getElementById("question").innerText = "Find: " + correct;
-
-    // Ambil pilihan acak
-    let options = [correct];
-    while (options.length < 3) {
-        let r = list[Math.floor(Math.random() * list.length)];
-        if (!options.includes(r)) options.push(r);
-    }
-    options.sort(() => Math.random() - 0.5);
-
-    // Tampilkan ke layar
-    document.getElementById("gameArea").innerHTML = `
-        <div id="timer">5</div>
-        <div id="progressBar"><div id="progressFill"></div></div>
-        <div class="optionBox">
-            ${options.map(o => <div class="option" onclick="selectAnswer(this,'${o}','${correct}')">${o}</div>).join("")}
-        </div>`;
-
-    let time = 5;
-    document.getElementById("progressFill").style.width = (currentQ / 15 * 100) + "%";
-
-    // Jalankan timer baru
-    quizTimer = setInterval(() => {
-        time--;
-        const timerEl = document.getElementById("timer");
-        if(timerEl) timerEl.innerText = time;
-        
-        if (time <= 0) {
-            clearInterval(quizTimer);
-            currentQ++;
-            loadQuestion();
-        }
-    }, 1000);
+function loadQuestion(){
+const list=quizData[currentWorld];
+if(currentQ>=15){
+endWorld();
+return;
 }
 
-function selectAnswer(el, picked, correct) {
-    // Hentikan timer segera saat jawaban diklik
-    clearInterval(quizTimer);
-    
-    document.querySelectorAll(".option").forEach(o => o.style.pointerEvents = "none");
+const correct=list[currentQ];
+document.getElementById("question").innerText="Find: "+correct;
 
-    if (picked === correct) {
-        el.classList.add("correct");
-        score++;
-        if(document.getElementById("correctSound")) document.getElementById("correctSound").play();
-    } else {
-        el.classList.add("wrong");
-        if(document.getElementById("wrongSound")) document.getElementById("wrongSound").play();
-    }
+let options=[correct];
+while(options.length<3){
+let r=list[Math.floor(Math.random()*15)];
+if(!options.includes(r)) options.push(r);
+}
+options.sort(()=>Math.random()-0.5);
 
-    setTimeout(() => {
-        currentQ++;
-        loadQuestion();
-    }, 800);
+document.getElementById("gameArea").innerHTML=`
+<div id="timer">5</div>
+<div id="progressBar"><div id="progressFill"></div></div>
+<div class="optionBox">
+${options.map(o=>`<div class="option" onclick="selectAnswer(this,'${o}','${correct}')">${o}</div>`).join("")}
+</div>`;
+
+let time=5;
+document.getElementById("progressFill").style.width=(currentQ/15*100)+"%";
+
+let t=setInterval(()=>{
+time--;
+document.getElementById("timer").innerText=time;
+if(time<=0){
+clearInterval(t);
+currentQ++;
+loadQuestion();
+}
+},1000);
 }
 
-function endWorld() {
-    if (quizTimer) clearInterval(quizTimer);
-    unlockedWorld++;
-    show("map");
-    loadMap();
-    alert("Hore! Level Selesai. Skor kamu: " + score);
+function selectAnswer(el,a,c){
+document.querySelectorAll(".option").forEach(o=>o.style.pointerEvents="none");
+if(a==c){
+el.classList.add("correct");
+score++;
+document.getElementById("correctSound").play();
+}else{
+el.classList.add("wrong");
+document.getElementById("wrongSound").play();
+}
+setTimeout(()=>{
+currentQ++;
+loadQuestion();
+},800);
+}
+
+function endWorld(){
+unlockedWorld++;
+show("map");
+loadMap();
+alert("World complete! ⭐");
 }
 </script>
 <!-- ================= BAGIAN D : LEARNING GALLERY ================= -->
+
 <style>
 #galleryArea{
 display:flex;
