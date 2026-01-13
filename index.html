@@ -353,6 +353,7 @@ transport:["Car","Bus","Bike","Train","Plane","Ship","Truck","Taxi","Boat","Moto
 let currentQ=0;
 let score=0;
 let currentWorld="";
+let quizTimer=null; 
 
 function startGame(world){
 currentWorld=world;
@@ -388,8 +389,13 @@ ${options.map(o=>`<div class="option" onclick="selectAnswer(this,'${o}','${corre
 
 let time=5;
 document.getElementById("progressFill").style.width=(currentQ/15*100)+"%";
+function selectAnswer(el,a,c){
+clearInterval(quizTimer);   
+document.querySelectorAll(".option").forEach(o=>o.style.pointerEvents="none");
+if(quizTimer) clearInterval(quizTimer);   
 
-let t=setInterval(()=>{
+quizTimer=setInterval(()=>{
+
 time--;
 document.getElementById("timer").innerText=time;
 if(time<=0){
