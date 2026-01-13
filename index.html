@@ -1,291 +1,508 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Easy English Adventure - Fixed</title>
-    <style>
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            font-family: 'Comic Sans MS', cursive;
-            background: linear-gradient(#67c7ff, #b97cff);
-            min-height: 100vh;
-            color: white;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+<meta charset="UTF-8">
+<title>Easy English Adventure</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        /* ================== OVERLAY ================== */
-        #startOverlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.9);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-            font-size: 24px;
-            cursor: pointer;
-            text-align: center;
-            padding: 20px;
-        }
+<style>
+*{box-sizing:border-box;}
+body{
+margin:0;
+font-family:'Comic Sans MS',cursive;
+background:linear-gradient(#6dd5fa,#c77dff);
+min-height:100vh;
+color:white;
+overflow-x:hidden;
+}
 
-        /* ================== TOP BAR (Navigasi) ================== */
-        .topbar {
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            display: flex;
-            gap: 12px;
-            z-index: 9999; /* Pastikan paling depan */
-        }
-        .topbar button {
-            background: #ffdd00;
-            border: 2px solid #000;
-            padding: 10px 15px;
-            border-radius: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 3px 3px 0px #000;
-            color: black;
-            font-family: 'Comic Sans MS', cursive;
-        }
-        .topbar button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0px #000; }
+/* ===== AUTOPLAY OVERLAY ===== */
+#startOverlay{
+position:fixed;
+top:0;left:0;right:0;bottom:0;
+background:rgba(0,0,0,0.85);
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:28px;
+z-index:10000;
+cursor:pointer;
+text-align:center;
+padding:20px;
+}
 
-        /* ================== SCREEN SYSTEM ================== */
-        .screen {
-            display: none;
-            width: 100%;
-            max-width: 500px;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            animation: fade .5s;
-            padding: 20px;
-        }
-        .active { display: flex; }
+/* ===== TOP BAR ===== */
+.topbar{
+position:fixed;
+top:10px;
+right:10px;
+z-index:9999;
+display:flex;
+gap:10px;
+}
+.topbar button{
+background:#ffdd00;
+border:none;
+border-radius:12px;
+padding:12px 18px;
+font-size:14px;
+font-weight:bold;
+cursor:pointer;
+box-shadow:3px 3px #000;
+}
 
-        @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+/* ===== SCREEN SYSTEM ===== */
+.screen{
+display:none;
+min-height:100vh;
+padding:90px 20px 30px;
+animation:fade .6s;
+}
+.active{
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:20px;
+}
 
-        h1, h2 { text-shadow: 3px 3px #000; text-align: center; margin: 10px 0; }
+@keyframes fade{
+from{opacity:0;}
+to{opacity:1;}
+}
 
-        /* ================== OPTIONS (Perbaikan Ketindihan) ================== */
-        .option-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px; /* Memberi jarak antar tombol putih */
-            width: 100%;
-            padding: 10px;
-            z-index: 10;
-        }
+h1,h2{
+text-shadow:3px 3px #000;
+text-align:center;
+}
 
-        .option {
-            background: white;
-            color: black;
-            border-radius: 15px;
-            padding: 18px;
-            width: 100%;
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.2s;
-            box-shadow: 0 4px 0px #ccc;
-            border: none;
-        }
-        .option:hover { background: #f0f0f0; }
-        .option.correct { background: #4cff4c !important; color: white; }
-        .option.wrong { background: #ff4c4c !important; color: white; }
+/* ===== BUTTON ===== */
+button.main{
+padding:15px 30px;
+border-radius:20px;
+border:none;
+font-size:18px;
+background:#ffcc00;
+cursor:pointer;
+box-shadow:3px 3px #000;
+}
 
-        /* ================== GAME UI ================== */
-        #timer { font-size: 32px; color: #ffeb3b; font-weight: bold; text-shadow: 2px 2px #000; }
-        .progress {
-            width: 90%;
-            height: 25px;
-            background: rgba(255,255,255,0.3);
-            border-radius: 15px;
-            overflow: hidden;
-            border: 2px solid #000;
-        }
-        .progress div { height: 100%; background: #00ff00; width: 0%; transition: width 0.3s; }
-        
-        .main-btn {
-            padding: 15px 40px;
-            border-radius: 25px;
-            border: 2px solid #000;
-            font-size: 22px;
-            background: #ffcc00;
-            cursor: pointer;
-            box-shadow: 4px 4px 0px #000;
-            font-family: 'Comic Sans MS', cursive;
-            color: black;
-        }
-    </style>
+/* ===== RESPONSIVE ===== */
+@media(max-width:600px){
+h1{font-size:28px;}
+button.main{font-size:16px;}
+}
+</style>
 </head>
 
 <body>
 
-    <div id="startOverlay">
-        <h1>Easy English Adventure</h1>
-        <p>👉 Klik di mana saja untuk mulai & aktifkan suara 👈</p>
-    </div>
+<!-- ===== AUTOPLAY FIX ===== -->
+<div id="startOverlay">👉 Klik di mana saja untuk mulai & aktifkan suara 👈</div>
 
-    <div class="topbar">
-        <button onclick="goHome()">🏠 Home</button>
-        <button id="musicBtn">🎵 Music: ON</button>
-    </div>
+<!-- ===== TOP BAR ===== -->
+<div class="topbar">
+  <button onclick="goHome()">🏠 Home</button>
+  <button id="musicBtn">🎵 Music</button>
+</div>
 
-    <div id="home" class="screen active">
-        <h1>Easy English Adventure</h1>
-        <button class="main-btn" onclick="openWorld()">Start Adventure</button>
-    </div>
+<!-- ===== HOME ===== -->
+<div id="home" class="screen active">
+  <h1>Easy English Adventure</h1>
+  <button class="main" onclick="openMap()">Start Adventure</button>
+  <button class="main" onclick="openGallery()">Learning Gallery</button>
+</div>
 
-    <div id="world" class="screen">
-        <h2>Choose Topic</h2>
-        <button class="main-btn" style="margin-bottom:10px" onclick="startGame('colors')">Colors</button>
-        <button class="main-btn" style="margin-bottom:10px" onclick="startGame('animals')">Animals</button>
-        <button class="main-btn" onclick="startGame('numbers')">Numbers</button>
-    </div>
+<!-- ===== MAP (akan diisi di Bagian B) ===== -->
+<div id="map" class="screen">
+  <h2>Adventure Map</h2>
+  <div id="mapArea">Loading map...</div>
+</div>
 
-    <div id="game" class="screen">
-        <h2 id="question">Find: ...</h2>
-        <div id="timer">5</div>
-        <div class="progress"><div id="bar"></div></div>
-        <div class="option-container" id="options"></div>
-    </div>
+<!-- ===== GAME (akan diisi di Bagian C) ===== -->
+<div id="game" class="screen">
+  <h2 id="question">Question</h2>
+  <div id="gameArea">Loading game...</div>
+</div>
 
-    <div id="gameover" class="screen">
-        <h1 id="msg">Game Over</h1>
-        <h2 id="scoreText">Score: 0 / 15</h2>
-        <button class="main-btn" onclick="retry()">Try Again</button>
-    </div>
+<!-- ===== GALLERY (akan diisi di Bagian D) ===== -->
+<div id="gallery" class="screen">
+  <h2>Learning Gallery</h2>
+  <div id="galleryArea">Loading gallery...</div>
+</div>
 
-    <audio id="bgm" loop src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_0d82b1f3f3.mp3"></audio>
-    <audio id="correctSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_6b9a2e0c3a.mp3"></audio>
-    <audio id="wrongSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_76b81b0b20.mp3"></audio>
+<!-- ===== AUDIO ===== -->
+<audio id="bgm" loop src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_0d82b1f3f3.mp3"></audio>
+<audio id="correctSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_6b9a2e0c3a.mp3"></audio>
+<audio id="wrongSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_76b81b0b20.mp3"></audio>
 
-    <script>
-        const bgm = document.getElementById("bgm");
-        const musicBtn = document.getElementById("musicBtn");
-        const startOverlay = document.getElementById("startOverlay");
+<script>
+let audioUnlocked=false;
+const bgm=document.getElementById("bgm");
 
-        /* ========== DATA ========== */
-        const data = {
-            colors: ["Red","Blue","Green","Yellow","Black","White","Pink","Purple","Orange","Brown","Gray","Cyan","Gold","Silver","Violet"],
-            animals: ["Cat","Dog","Bird","Cow","Fish","Horse","Lion","Tiger","Elephant","Duck","Goat","Sheep","Monkey","Frog","Rabbit"],
-            numbers: ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"]
-        };
+/* ===== AUTOPLAY FIX ===== */
+document.getElementById("startOverlay").addEventListener("click",()=>{
+audioUnlocked=true;
+bgm.play();
+document.getElementById("startOverlay").style.display="none";
+});
 
-        let topic = "", current = 0, score = 0, time = 5, timer;
+/* ===== MUSIC BUTTON ===== */
+document.getElementById("musicBtn").addEventListener("click",()=>{
+if(!audioUnlocked) return;
+if(bgm.paused) bgm.play();
+else bgm.pause();
+});
 
-        /* ========== FIX AUTOPLAY & OVERLAY ========== */
-        startOverlay.addEventListener("click", () => {
-            bgm.play().catch(e => console.log("Audio play failed", e));
-            startOverlay.style.display = "none";
-        });
+/* ===== SCREEN CONTROL ===== */
+function show(id){
+document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+function goHome(){show("home");}
+function openMap(){show("map");}
+function openGallery(){show("gallery");}
+</script>
 
-        /* ========== MUSIC TOGGLE ========== */
-        musicBtn.addEventListener("click", (e) => {
-            e.stopPropagation(); // Mencegah trigger elemen di bawahnya
-            if (bgm.paused) {
-                bgm.play();
-                musicBtn.innerText = "🎵 Music: ON";
-                musicBtn.style.opacity = "1";
-            } else {
-                bgm.pause();
-                musicBtn.innerText = "🎵 Music: OFF";
-                musicBtn.style.opacity = "0.7";
-            }
-        });
-
-        /* ========== NAVIGATION ========== */
-        function show(id) {
-            document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-            document.getElementById(id).classList.add("active");
-        }
-        function goHome() { clearInterval(timer); show("home"); }
-        function openWorld() { show("world"); }
-
-        /* ========== GAME LOGIC ========== */
-        function startGame(t) {
-            topic = t;
-            current = 0;
-            score = 0;
-            show("game");
-            nextQ();
-        }
-
-        function nextQ() {
-            if (current >= 15) { endGame(); return; }
-            clearInterval(timer);
-            
-            let correct = data[topic][current];
-            document.getElementById("question").innerText = "Find: " + correct;
-
-            // Acak pilihan
-            let opts = [correct];
-            while (opts.length < 3) {
-                let r = data[topic][Math.floor(Math.random() * 15)];
-                if (!opts.includes(r)) opts.push(r);
-            }
-            opts.sort(() => Math.random() - 0.5);
-
-            // Tampilkan pilihan
-            let html = "";
-            opts.forEach(o => {
-                html += <button class="option" onclick="answer(this,'${o}','${correct}')">${o}</button>;
-            });
-            document.getElementById("options").innerHTML = html;
-
-            // Timer & Progress
-            time = 5;
-            document.getElementById("timer").innerText = time;
-            document.getElementById("bar").style.width = (current / 15 * 100) + "%";
-
-            timer = setInterval(() => {
-                time--;
-                document.getElementById("timer").innerText = time;
-                if (time <= 0) {
-                    clearInterval(timer);
-                    current++;
-                    nextQ();
-                }
-            }, 1000);
-        }
-
-        function answer(el, a, c) {
-            clearInterval(timer);
-            // Disable klik agar tidak double klik
-            const buttons = document.querySelectorAll(".option");
-            buttons.forEach(b => b.style.pointerEvents = "none");
-
-            if (a == c) {
-                el.classList.add("correct");
-                document.getElementById("correctSound").play();
-                score++;
-            } else {
-                el.classList.add("wrong");
-                document.getElementById("wrongSound").play();
-            }
-            
-            setTimeout(() => {
-                current++;
-                nextQ();
-            }, 800);
-        }
-
-        function endGame() {
-            show("gameover");
-            document.getElementById("scoreText").innerText = "Score: " + score + " / 15";
-            let msg = score > 10 ? "Great Job!" : "Keep Learning!";
-            if (score === 15) msg = "Fantastic!";
-            document.getElementById("msg").innerText = msg;
-        }
-
-        function retry() { startGame(topic); }
-    </script>
 </body>
 </html>
+<!-- ================= BAGIAN B : AVATAR & MAP ================= -->
+
+<style>
+/* ===== AVATAR ===== */
+#avatarSelect{
+display:flex;
+gap:20px;
+flex-wrap:wrap;
+justify-content:center;
+}
+.avatarCard{
+background:white;
+color:black;
+padding:15px;
+border-radius:15px;
+cursor:pointer;
+width:120px;
+box-shadow:3px 3px #000;
+transition:.3s;
+}
+.avatarCard:hover{transform:scale(1.1);}
+.avatarImg{
+font-size:50px;
+}
+
+/* ===== MAP ===== */
+#mapArea{
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:25px;
+margin-top:20px;
+}
+
+.mapNode{
+background:white;
+color:black;
+padding:15px 25px;
+border-radius:30px;
+font-weight:bold;
+cursor:pointer;
+box-shadow:3px 3px #000;
+position:relative;
+}
+.mapNode.locked{
+background:#aaa;
+color:#555;
+cursor:not-allowed;
+}
+.mapNode.done{
+background:#7CFF7C;
+}
+.mapLine{
+width:4px;
+height:40px;
+background:white;
+}
+</style>
+
+<script>
+/* ===== AVATAR DATA ===== */
+let playerAvatar=null;
+const avatars=[
+ {name:"Panda",icon:"🐼"},
+ {name:"Puppy",icon:"🐶"},
+ {name:"Kitty",icon:"🐱"},
+ {name:"Bunny",icon:"🐰"}
+];
+
+/* ===== WORLD DATA ===== */
+const worlds=[
+ {id:"animals",name:"🌳 Animals Forest"},
+ {id:"food",name:"🍎 Food Town"},
+ {id:"colors",name:"🎨 Color Hills"},
+ {id:"numbers",name:"🔢 Number Valley"},
+ {id:"transport",name:"🚗 Transport City"}
+];
+let unlockedWorld=0;
+
+/* ===== LOAD MAP ===== */
+function loadMap(){
+const map=document.getElementById("mapArea");
+map.innerHTML="";
+
+if(!playerAvatar){
+map.innerHTML="<h3>Choose Your Animal Hero</h3><div id='avatarSelect'></div>";
+let avDiv=document.getElementById("avatarSelect");
+avatars.forEach(a=>{
+avDiv.innerHTML+=`
+<div class="avatarCard" onclick="selectAvatar('${a.name}')">
+<div class="avatarImg">${a.icon}</div>
+${a.name}
+</div>`;
+});
+return;
+}
+
+worlds.forEach((w,i)=>{
+let cls="mapNode";
+if(i<unlockedWorld) cls+=" done";
+if(i>unlockedWorld) cls+=" locked";
+
+map.innerHTML+=`
+<div class="${cls}" onclick="openWorldFromMap(${i})">${w.name}</div>
+${i<worlds.length-1?'<div class="mapLine"></div>':""}`;
+});
+}
+
+/* ===== SELECT AVATAR ===== */
+function selectAvatar(name){
+playerAvatar=name;
+loadMap();
+}
+
+/* ===== OPEN WORLD ===== */
+function openWorldFromMap(i){
+if(i!=unlockedWorld) return;
+startGame(worlds[i].id);
+}
+
+/* ===== EXTEND openMap() ===== */
+const _openMap=openMap;
+openMap=function(){
+show("map");
+loadMap();
+}
+</script>
+<!-- ================= BAGIAN C : GAME QUIZ ================= -->
+
+<style>
+#gameArea{
+width:100%;
+max-width:500px;
+display:flex;
+flex-direction:column;
+gap:15px;
+align-items:center;
+}
+
+#timer{
+font-size:28px;
+color:#ff5555;
+}
+
+#progressBar{
+width:100%;
+height:20px;
+background:#ddd;
+border-radius:10px;
+overflow:hidden;
+}
+#progressFill{
+height:100%;
+background:#4cff4c;
+width:0%;
+}
+
+.optionBox{
+display:flex;
+flex-direction:column;
+gap:15px;
+width:100%;
+}
+.option{
+background:white;
+color:black;
+padding:15px;
+border-radius:15px;
+cursor:pointer;
+font-size:18px;
+width:100%;
+}
+.option.correct{background:#4cff4c;}
+.option.wrong{background:#ff4c4c;color:white;}
+</style>
+
+<script>
+const quizData={
+animals:["Cat","Dog","Bird","Cow","Fish","Horse","Lion","Tiger","Elephant","Duck","Goat","Sheep","Monkey","Frog","Rabbit"],
+food:["Apple","Rice","Milk","Bread","Cake","Egg","Fish","Soup","Pizza","Banana","Burger","Cheese","Orange","Chicken","Water"],
+colors:["Red","Blue","Green","Yellow","Black","White","Pink","Purple","Orange","Brown","Gray","Cyan","Gold","Silver","Violet"],
+numbers:["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"],
+transport:["Car","Bus","Bike","Train","Plane","Ship","Truck","Taxi","Boat","Motorcycle","Helicopter","Subway","Scooter","Tram","Van"]
+};
+
+let currentQ=0;
+let score=0;
+let currentWorld="";
+
+function startGame(world){
+currentWorld=world;
+currentQ=0;
+score=0;
+show("game");
+loadQuestion();
+}
+
+function loadQuestion(){
+const list=quizData[currentWorld];
+if(currentQ>=15){
+endWorld();
+return;
+}
+
+const correct=list[currentQ];
+document.getElementById("question").innerText="Find: "+correct;
+
+let options=[correct];
+while(options.length<3){
+let r=list[Math.floor(Math.random()*15)];
+if(!options.includes(r)) options.push(r);
+}
+options.sort(()=>Math.random()-0.5);
+
+document.getElementById("gameArea").innerHTML=`
+<div id="timer">5</div>
+<div id="progressBar"><div id="progressFill"></div></div>
+<div class="optionBox">
+${options.map(o=>`<div class="option" onclick="selectAnswer(this,'${o}','${correct}')">${o}</div>`).join("")}
+</div>`;
+
+let time=5;
+document.getElementById("progressFill").style.width=(currentQ/15*100)+"%";
+
+let t=setInterval(()=>{
+time--;
+document.getElementById("timer").innerText=time;
+if(time<=0){
+clearInterval(t);
+currentQ++;
+loadQuestion();
+}
+},1000);
+}
+
+function selectAnswer(el,a,c){
+document.querySelectorAll(".option").forEach(o=>o.style.pointerEvents="none");
+if(a==c){
+el.classList.add("correct");
+score++;
+document.getElementById("correctSound").play();
+}else{
+el.classList.add("wrong");
+document.getElementById("wrongSound").play();
+}
+setTimeout(()=>{
+currentQ++;
+loadQuestion();
+},800);
+}
+
+function endWorld(){
+unlockedWorld++;
+show("map");
+loadMap();
+alert("World complete! ⭐");
+}
+</script>
+<!-- ================= BAGIAN D : LEARNING GALLERY ================= -->
+
+<style>
+#galleryArea{
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:20px;
+}
+#galleryImg{
+font-size:120px;
+}
+#galleryText{
+font-size:28px;
+font-weight:bold;
+text-shadow:2px 2px #000;
+}
+.galleryControls{
+display:flex;
+gap:15px;
+}
+.galleryControls button{
+padding:10px 20px;
+border-radius:15px;
+border:none;
+background:#ffdd00;
+font-size:18px;
+cursor:pointer;
+box-shadow:3px 3px #000;
+}
+</style>
+
+<script>
+const galleryData=[
+ {name:"Cat",icon:"🐱"},
+ {name:"Dog",icon:"🐶"},
+ {name:"Apple",icon:"🍎"},
+ {name:"Car",icon:"🚗"},
+ {name:"Bus",icon:"🚌"},
+ {name:"Banana",icon:"🍌"},
+ {name:"Lion",icon:"🦁"},
+ {name:"Fish",icon:"🐟"}
+];
+let gIndex=0;
+
+function loadGallery(){
+show("gallery");
+renderGallery();
+}
+
+function renderGallery(){
+const item=galleryData[gIndex];
+document.getElementById("galleryArea").innerHTML=`
+<div id="galleryImg">${item.icon}</div>
+<div id="galleryText">${item.name}</div>
+<div class="galleryControls">
+<button onclick="prevItem()">⏮</button>
+<button onclick="speakItem()">🔊</button>
+<button onclick="nextItem()">⏭</button>
+</div>`;
+}
+
+function nextItem(){
+gIndex=(gIndex+1)%galleryData.length;
+renderGallery();
+}
+function prevItem(){
+gIndex--;
+if(gIndex<0) gIndex=galleryData.length-1;
+renderGallery();
+}
+function speakItem(){
+let u=new SpeechSynthesisUtterance(galleryData[gIndex].name);
+speechSynthesis.speak(u);
+}
+
+/* Override openGallery from Part A */
+const _openGallery=openGallery;
+openGallery=function(){
+loadGallery();
+}
+</script>
+
