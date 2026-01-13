@@ -108,7 +108,7 @@ button.main{font-size:16px;}
 <!-- ===== HOME ===== -->
 <div id="home" class="screen active">
   <h1>Easy English Adventure</h1>
-  <button class="main" onclick="openMap()">Start Adventure</button>
+  <button class="main" onclick="starGame('animals') ">Start Adventure</button>
   <button class="main" onclick="openGallery()">Learning Gallery</button>
 </div>
 
@@ -437,12 +437,12 @@ function loadQuestion() {
     options.sort(() => Math.random() - 0.5);
 
     // Update Tampilan
-    document.getElementById("gameArea").innerHTML = `
-        <div id="timer">5</div>
-        <div id="progressBar"><div id="progressFill"></div></div>
-        <div class="optionBox">
-            ${options.map(o => <div class="option" onclick="selectAnswer(this,'${o}','${correct}')">${o}</div>).join("")}
-        </div>`;
+   document.getElementById("gameArea").innerHTML = `
+    <div id="timer">5</div>
+    <div id="progressBar"><div id="progressFill"></div></div>
+    <div class="optionBox">
+        ${options.map(o => <div class="option" onclick="selectAnswer(this,'${o}','${correct}')">${o}</div>).join("")}
+    </div>`;
 
     // Jalankan Timer
     let time = 5;
